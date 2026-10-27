@@ -19,7 +19,7 @@ Every time an artifact `.md` lands in a watched folder, beautyfact writes a sibl
 
 - 📌 The mirror never replaces the source — a read-time hook enforces that.
 - 📌 Claude Code-shaped install, but the logic is just "read `SKILL.md`,
-  redraw the file" — any agent can wire its own trigger.
+redraw the file" — any agent can wire its own trigger.
 
 ## 2. 👀 Example
 
@@ -47,12 +47,14 @@ Same two requirements, nothing added or cut — just drawn so the relation
 
 ## 3. ⚙️ Install
 
-**Ask your agent:** «Install this kit and adapt the hooks to my harness.»
+**Clone this repo in your project's folder and ask your agent:** «Install this kit and adapt the hooks to my harness.»
 
 **Claude Code, direct:**
+
 ```bash
 python3 install.py /path/to/your/project
 ```
+
 Re-run to update — hooks never duplicate; `settings.json` is backed up.
 
 ## 4. 📁 What goes where
@@ -81,7 +83,7 @@ Re-run to update — hooks never duplicate; `settings.json` is backed up.
 
 - 📌 Nothing is summarized away — every ID/requirement/decision survives.
 - 📌 One diagram per structured section, 2–5 bullets adding only what
-  the diagram can't show.
+the diagram can't show.
 
 ## 6. 🔧 Settings
 
