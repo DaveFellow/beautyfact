@@ -4,7 +4,7 @@
 Usage: python3 install.py [target-project-dir]   (default: current directory)
 
 This script covers Claude Code and Cursor only. Other harnesses are
-listed in the README install map.
+listed in HARNESS.md.
 
 Copies the skill to <target>/.claude/skills/beautyfact/ and the hooks to
 <target>/.claude/hooks/, then adds them to <target>/.claude/settings.json.
