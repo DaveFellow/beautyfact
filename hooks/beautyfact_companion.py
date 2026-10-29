@@ -1,9 +1,9 @@
 """PostToolUse hook: ask for a `_beautyfact` version of each newly written artifact.
 
 Runs after the Write tool. When the written file is a .md inside a watched folder
-(and is not itself a `_beautyfact` version), it tells the agent, through
-additionalContext, to write `<name>_beautyfact.md` next to it following the
-beautyfact skill. A hook cannot write the diagrams itself; the agent does. It never
+(and is not itself a `_beautyfact` version), it tells the parent agent, through
+additionalContext, to delegate `<name>_beautyfact.md` to the beautyfact subagent.
+The parent does not write it. A hook cannot write the diagrams itself. It never
 blocks: any problem (unexpected input) is ignored silently.
 
 Edit the two constants below to change which folders are watched.
@@ -45,20 +45,22 @@ def main() -> None:
     parts = path.resolve().relative_to(ROOT).parts
     kit = "OpenSpec" if parts[:1] == ("openspec",) else "Spec Kit" if parts[:1] in ((".specify",), ("specs",)) else ""
     formats = (
-        f"This artifact follows {kit}, so also read .claude/skills/beautyfact/references/source-formats.md "
-        f"({kit} section): it names the diagram to draw for each source section (for example one "
-        f"small diagram per decision, trees for capabilities and impact). "
+        f"Tell the subagent this artifact follows {kit}, so it must also read "
+        f"references/source-formats.md ({kit} section) beside the skill: it names the diagram "
+        f"to draw for each source section (for example one small diagram per decision, trees "
+        f"for capabilities and impact). "
         if kit
         else ""
     )
     message = (
-        f"Artifact written: {target}. Now write its beautyfact version to {companion}, "
-        f"following .claude/skills/beautyfact/SKILL.md. Read that file fully first, then "
-        f".claude/skills/beautyfact/references/examples/opener.md, entries.md and the other "
-        f"example files its table lists for the sections you convert. {formats}Its 'Notation' section "
-        f"(emoji icons, 💬 before UI text, bold «names», ──▶ arrows) and 'The _beautyfact version "
-        f"of an existing artifact' section apply even if the source has none of them. "
-        f"Same content, beautyfact format; leave the original untouched."
+        f"Artifact written: {target}. A beautyfact mirror is required at {companion}. "
+        f"Do not write it yourself and do not read the beautyfact examples. "
+        f"ALWAYS delegate to the beautyfact subagent and wait for it "
+        f"(Cursor: Task tool, subagent_type beautyfact, foreground). "
+        f"Pass paths, not the file body: source {target}, destination {companion}, "
+        f"the original stays untouched, and the skill is .claude/skills/beautyfact/SKILL.md "
+        f"(skills/beautyfact/SKILL.md in the kit repo). {formats}"
+        f"The subagent reads the skill and writes the mirror."
     )
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": message}}))
 

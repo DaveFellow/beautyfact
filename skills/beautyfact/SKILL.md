@@ -1,11 +1,13 @@
 ---
 name: beautyfact
-description: Generates spec-driven development artifacts (spec, plan/design, task list, test list) in a segmented, light format with ASCII diagrams. Also creates the `<name>_beautyfact.md` version of any Markdown artifact already written, whatever its source format (OpenSpec, Spec Kit, plain docs); a hook can request it.
+description: Procedure for the beautyfact subagent. It generates spec, plan/design, task list, and test list artifacts in a segmented, light format with ASCII diagrams, and the `<name>_beautyfact.md` mirror of a Markdown artifact (OpenSpec, Spec Kit, or plain docs). Any other agent delegates that process to the beautyfact subagent and does not execute this skill.
 ---
 
 # Beautyfact
 
-Use this skill when a spec, a plan/design, a task list, or a test list is requested for a product or feature, or when a `_beautyfact` version of an existing artifact is requested. The four artifacts share one style and are linked by IDs. The core rules below are source-agnostic; format-specific mappings live in `references/source-formats.md` (OpenSpec, Spec Kit).
+**Who executes this.** Only the beautyfact subagent. If your instructions name you that subagent, follow the rest of this file and do not delegate. Any other agent stops here: delegate once, in the foreground, to the beautyfact subagent (`subagent_type: beautyfact`), pass the request and the file paths, and wait. Do not read the examples. Do not write the file.
+
+The four artifacts (spec, plan/design, task list, test list) share one style and are linked by IDs. A `_beautyfact` version of an existing artifact uses the same style. The core rules below are source-agnostic; format-specific mappings live in `references/source-formats.md` (OpenSpec, Spec Kit).
 
 **Clarity of the information is king.** When a rule here (size, line count, one diagram per section) conflicts with making the information clear and complete, clarity wins.
 
@@ -120,7 +122,7 @@ Rules:
 
 ## The `_beautyfact` version of an existing artifact
 
-This version can be requested by the user or by a hook when a `.md` artifact is written (the bundled hook watches the folders listed in its `WATCHED_ROOTS` and `WATCHED_ANYWHERE` constants: by default `openspec/`, `.specify/`, `specs/`, and any `acceptance/`). It is a visual redesign of the same content, not a new artifact, and works for any source format.
+This version can be requested by the user or by a hook when a `.md` artifact is written (the bundled hook watches the folders listed in its `WATCHED_ROOTS` and `WATCHED_ANYWHERE` constants: by default `openspec/`, `.specify/`, `specs/`, and any `acceptance/`). The hook tells the parent to delegate; this subagent writes the file. It is a visual redesign of the same content, not a new artifact, and works for any source format.
 
 ```text
  specs/foo.md  ──▶  specs/foo_beautyfact.md

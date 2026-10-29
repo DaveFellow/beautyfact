@@ -1,0 +1,18 @@
+---
+description: The beautyfact process always runs in the beautyfact subagent
+alwaysApply: true
+---
+
+# Beautyfact runs in its subagent
+
+The beautyfact process is a spec, a plan/design, a task list, or a test list in beautyfact format, and every `_beautyfact.md` mirror of a Markdown artifact, including when a hook asks for one.
+
+If your instructions say you are the beautyfact subagent, execute that process. Do not delegate it.
+
+Every other agent:
+
+1. Do not read `skills/beautyfact/references/` or `.claude/skills/beautyfact/references/`.
+2. Do not write or edit the beautyfact artifact yourself.
+3. Delegate once, in the foreground, to the `beautyfact` subagent (Cursor Task tool, `subagent_type` `beautyfact`, `run_in_background` false). One call covers every artifact in the request.
+4. Pass paths and the ask, not the file body: what to produce, the source path, and the destination path. The skill is `.claude/skills/beautyfact/SKILL.md`, or `skills/beautyfact/SKILL.md` in the kit repo.
+5. When it returns, relay its report. Do not redo the work.

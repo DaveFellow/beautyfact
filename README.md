@@ -1,8 +1,8 @@
 # 💅 beautyfact
 
-> A Claude Code skill + 3 hooks that mirror any spec `.md` into a
-> diagram-first version. Original untouched. Built for Claude, usable
-> by any agent that can read a skill file and hook on writes.
+> A skill, a subagent, and 3 hooks that mirror any spec `.md` into a
+> diagram-first version. The process always runs in the beautyfact
+> subagent. Original untouched.
 
 **Legend:** 🎯 purpose · ⚙️ setup · 📌 rule · 🔗 file ref
 
@@ -18,8 +18,8 @@ Every time an artifact `.md` lands in a watched folder, beautyfact writes a sibl
 ```
 
 - 📌 The mirror never replaces the source — a read-time hook enforces that.
-- 📌 Claude Code-shaped install, but the logic is just "read `SKILL.md`,
-redraw the file" — any agent can wire its own trigger.
+- 📌 The parent agent never writes the mirror. It delegates to the
+`beautyfact` subagent, which reads `SKILL.md` and redraws the file.
 
 ## 2. 👀 Example
 
@@ -62,14 +62,19 @@ Re-run to update — hooks never duplicate; `settings.json` is backed up.
 | Kit file | Installed to | Role |
 |---|---|---|
 | `skills/beautyfact/` | `.claude/skills/beautyfact/` | Format rules + examples |
-| `beautyfact_companion.py` | `.claude/hooks/` | On `Write`: asks for the mirror |
+| `.cursor/agents/beautyfact.md` | `.cursor/agents/` and `.claude/agents/` | The only agent that runs the process |
+| `.cursor/rules/beautyfact-subagent.mdc` | `.cursor/rules/` | Parent always delegates to that agent |
+| `beautyfact_companion.py` | `.claude/hooks/` | On `Write`: tells the parent to delegate the mirror |
 | `beautyfact_check.py` | `.claude/hooks/` | On mirror write/edit: fixes & flags notation |
 | `beautyfact_read_guard.py` | `.claude/hooks/` | On `Read`: source stays mandatory |
 
 ## 5. 🔄 How the mirror gets built
 
 ```text
- Write .md ──▶ companion hook ──▶ agent studies SKILL.md examples
+ Write .md ──▶ companion hook ──▶ parent delegates to the beautyfact subagent
+                                        │
+                                        ▼
+                  subagent studies SKILL.md examples (parent does not)
                                         │
                                         ▼
             section ──▶ 🔗 source link + diagram + bullets (no repeats)
@@ -80,6 +85,8 @@ Re-run to update — hooks never duplicate; `settings.json` is backed up.
                                         ▼
             read_guard: mirror read ──▶ still must read source
 ```
+
+- 📌 The parent never writes the mirror. Specs, plans, task lists, and test lists in this format go to the same subagent.
 
 - 📌 Nothing is summarized away — every ID/requirement/decision survives.
 - 📌 One diagram per structured section, 2–5 bullets adding only what

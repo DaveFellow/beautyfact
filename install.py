@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Install the beautyfact skill and its three hooks into a project.
+"""Install the beautyfact skill, subagent, and three hooks into a project.
 
 Usage: python3 install.py [target-project-dir]   (default: current directory)
 
 Copies the skill to <target>/.claude/skills/beautyfact/ and the hooks to
 <target>/.claude/hooks/, then adds them to <target>/.claude/settings.json.
-Safe to run again: existing hook entries are not duplicated, and the old
-settings.json is saved as settings.json.bak before it changes.
+Also copies the beautyfact subagent to <target>/.cursor/agents/ and
+<target>/.claude/agents/, and the Cursor rule that forces delegation to
+<target>/.cursor/rules/. Safe to run again: existing hook entries are not
+duplicated, and the old settings.json is saved as settings.json.bak before
+it changes.
 """
 
 import json
@@ -17,13 +20,13 @@ from pathlib import Path
 KIT = Path(__file__).resolve().parent
 HOOKS = (
     # (file, PostToolUse matcher, status message)
-    ("beautyfact_companion.py", "Write", "Requesting the beautyfact version"),
+    ("beautyfact_companion.py", "Write", "Delegating the beautyfact version"),
     ("beautyfact_check.py", "Write|Edit", "Checking the beautyfact file"),
     ("beautyfact_read_guard.py", "Read", "Checking for a beautyfact pair"),
 )
 
 
-def copy_files(claude: Path) -> None:
+def copy_files(target: Path, claude: Path) -> None:
     skill = claude / "skills" / "beautyfact"
     if skill.exists():
         shutil.rmtree(skill)
@@ -31,6 +34,14 @@ def copy_files(claude: Path) -> None:
     (claude / "hooks").mkdir(parents=True, exist_ok=True)
     for name, _, _ in HOOKS:
         shutil.copy2(KIT / "hooks" / name, claude / "hooks" / name)
+    agent = KIT / ".cursor" / "agents" / "beautyfact.md"
+    rule = KIT / ".cursor" / "rules" / "beautyfact-subagent.mdc"
+    for dest in (target / ".cursor" / "agents", claude / "agents"):
+        dest.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(agent, dest / "beautyfact.md")
+    rules = target / ".cursor" / "rules"
+    rules.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(rule, rules / "beautyfact-subagent.mdc")
 
 
 def register(settings_path: Path) -> list[str]:
@@ -60,9 +71,10 @@ def main() -> None:
     if not target.is_dir():
         sys.exit(f"Not a directory: {target}")
     claude = target / ".claude"
-    copy_files(claude)
+    copy_files(target, claude)
     added = register(claude / "settings.json")
     print(f"Installed in {claude}")
+    print(f"Subagent: {target / '.cursor' / 'agents' / 'beautyfact.md'}")
     print("Hooks registered: " + (", ".join(added) if added else "already present"))
     print("Watched folders: edit WATCHED_ROOTS / WATCHED_ANYWHERE in .claude/hooks/beautyfact_companion.py")
 
