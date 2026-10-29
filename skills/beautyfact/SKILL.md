@@ -7,6 +7,8 @@ description: Procedure for the beautyfact subagent. It generates spec, plan/desi
 
 **Who executes this.** Only the beautyfact subagent. If your instructions name you that subagent, follow the rest of this file and do not delegate. Any other agent stops here: delegate once, in the foreground, to the beautyfact subagent (`subagent_type: beautyfact`), pass the request and the file paths, and wait. Do not read the examples. Do not write the file.
 
+**Hard rule: mechanical work stays in the tool.** Counting characters, aligning columns, checking a line's width, checking that a link's file and line exist, wrapping « » in bold, and rewriting a short arrow to `──▶` are mechanical. `beautyfact_check.py` does them. Run that script. Do not read its source. Do not reimplement it in a shell script, a private checker, or by printing indexes. Do not measure again something the script already reported. The same rule covers every mechanical task: if a script or hook already does it, run that and do not redo it by hand. After it runs, change only the lines it names.
+
 The four artifacts (spec, plan/design, task list, test list) share one style and are linked by IDs. A `_beautyfact` version of an existing artifact uses the same style. The core rules below are source-agnostic; format-specific mappings live in `references/source-formats.md` (OpenSpec, Spec Kit).
 
 **Clarity of the information is king.** When a rule here (size, line count, one diagram per section) conflicts with making the information clear and complete, clarity wins.
@@ -15,7 +17,7 @@ The four artifacts (spec, plan/design, task list, test list) share one style and
 1. List the sections of the source and the pattern each one has (use the table below).
 2. Read EVERY example file the table gives for those patterns, plus `opener.md` and `entries.md` always, in one batch (each is about 1 KB; reading fewer than the table says is the main cause of poor output).
 3. If the source is an OpenSpec or Spec Kit artifact, also read `references/source-formats.md`: it says which diagram to draw for each source section (a small diagram per decision, trees for capabilities and impact). Skipping it makes the file much less graphic.
-4. Start your reply or file with nothing else until they are read. In your final report, list the section ──▶ example files mapping.
+4. Start your reply or file with nothing else until they are read. Keep the section ──▶ pattern list from step 1 as your plan; it does not go in the report.
 
 Copy their shape: a short summary, a diagram for every structured section, entries that keep every detail, and source links. Deviate only when a diagram would not make the information clearer.
 
@@ -61,7 +63,7 @@ Apply these in every artifact and every `_beautyfact` version, even when the sou
 - **Titles of acceptance criteria and scenarios** start with 🎯: `- 🎯 **Add a unit** 🔗 [L62]`.
 - **Backticks:** code, paths, commands, identifiers and literal values.
 - **Arrows:** one arrow style everywhere: the long `──▶` in diagrams and on every WHEN/THEN line after the first. Vertical and backward arrows are `▼ ▲ ◀`. Never the short `→ ← ↑ ↓`.
-- **Emoji on every bullet.** Every top-level bullet starts with an emoji for its type, or carries one inline where the bullet is mostly a quote: 📌 rule · ⚠️ edge case · 🖱️ user action · 🎯 result · 💬 UI text · 🔒 security · 🧭 decision · ❓ question. Sub-bullets get one only when they quote UI text (💬) or add a link (🔗). A bullet with no fitting type gets 📌.
+- **Emoji on every bullet.** Every top-level bullet starts with an emoji for its type: 📌 rule · ⚠️ edge case · 🖱️ user action · 🎯 result · 💬 UI text · 🔒 security · 🧭 decision · ❓ question. An entry with an ID carries its type emoji right before or right after the ID, always before the title and the 🔗 link: `- RF-04 📌 (M) 🔗 …`, `- D1 🧭 «**Writer**» 🔗 …`, `- ❓ Q1 🔗 …`. 🔗 marks a link, never the type. A bullet that is mostly a quote may carry its 💬 inline instead. Sub-bullets get one only when they quote UI text (💬) or add a link (🔗). A bullet with no fitting type gets 📌.
 - **Checkboxes:** `- [ ]` and a closing checkbox summary only when the source has approval state. Never invent them.
 
 ## ASCII rules
@@ -122,7 +124,7 @@ Rules:
 
 ## The `_beautyfact` version of an existing artifact
 
-This version can be requested by the user or by a hook when a `.md` artifact is written (the bundled hook watches the folders listed in its `WATCHED_ROOTS` and `WATCHED_ANYWHERE` constants: by default `openspec/`, `.specify/`, `specs/`, and any `acceptance/`). The hook tells the parent to delegate; this subagent writes the file. It is a visual redesign of the same content, not a new artifact, and works for any source format.
+The user or a hook asks for it; this subagent writes it. It is a visual redesign of the same content, not a new artifact, and works for any source format.
 
 ```text
  specs/foo.md  ──▶  specs/foo_beautyfact.md
@@ -144,7 +146,6 @@ This version can be requested by the user or by a hook when a `.md` artifact is 
 - **Nothing is ever missing.** Every section, ID, bullet, reason, and value of the original appears, including checklists of what to review, scope exclusions, deferral reasons, "modified" notes, and open questions, whatever the source calls them. Completeness beats the ~200-line limit: add diagrams, do not cut content.
 - **Keep the source's own structure.** Preserve its section names, heading levels, ID scheme, and ordering: number the source's top-level sections in order (`## N. ` + the source's own title) and keep a source `###` as `###`. Never impose another format's headers or invent IDs it does not use.
 - **Very graphic and light to read.** One diagram per structured section; the content of entries is kept in their labeled lines (📌 ❌ 💡 …).
-- **Quoted names in bold.** The text between « and » is bold, the quotation marks are not: `«**Writer**»`. Not inside diagrams (code blocks).
 - **Arrows in acceptance cases.** In every WHEN/THEN (or Given/When/Then) case, whatever the source format, the first line (GIVEN/WHEN) has no arrow and each following line (THEN, NOT, AND, Then, And…) starts with `──▶`, verbatim after it: `- WHEN …` then `- ──▶ THEN …`.
 - **Quality checklist.** Before finishing, confirm:
   - Every number in the text ("sixteen criteria in four areas") matches the diagram rows. Groupings the source does not have are labeled `(grouping)`, never presented as the source's own.
@@ -153,14 +154,17 @@ This version can be requested by the user or by a hook when a `.md` artifact is 
   - Source headings, numbering, wording and cross-references ("see section 19") are kept; nothing is renamed or paraphrased, and apart from the one-line header under the title (see `opener.md`) no sentence says what the file is.
   - Bullets repeat nothing the diagram already holds in full. When a diagram holds an item's whole text (a tree with two-line entries), the bullets add only what it lacks; when it holds only labels, the bullets carry the full text.
   - A diagram that belongs to one entry goes before the entry line, never between the entry line and its sub-bullets (that breaks the list).
-- **Source link per section.** Under each heading, `🔗 Source: [file.md L13–L18](file.md#L13)`. Paths are relative to the `_beautyfact` file. The link always points at the range's *start* line only (`#L13`, never `#L13-L18`): the full range stays in the visible text for humans, but the GitHub-style `#L13-L18` fragment is not honored by VS Code's or Cursor's own Markdown link handling, which only jumps on a single `#L<n>`.
+- **Source link per section.** Under each heading, `🔗 Source: [file.md L13–L18](file.md#L13)`. Paths are relative to the `_beautyfact` file. The href is always the range's *start* line only (`#L13`, never `#L13-L18`, which VS Code and Cursor do not jump to); the full range stays in the visible text.
 - **Link per point, beside the title.** Each acceptance criterion (WHEN/THEN or Given/When/Then) and each entry with an ID (`D1`, `T-03`, `FR-001`, `Q1`…) keeps its title as is and carries `🔗 [L62](file.md#L62)` or `🔗 [L81–L84](file.md#L81)` next to it (same rule: the href is the start line, the range is only in the text).
   - Examples: `- 🎯 **Add a unit** 🔗 [L62](source.md#L62)` · `- [ ] D1 🧭 «**Writer**» ownership 🔗 [L81–L84](source.md#L81)` (the checkbox only because that source has one).
-  - An item without a title: `- Q1 🔗 [L148](source.md#L148): text`.
+  - An item without a title: `- ❓ Q1 🔗 [L148](source.md#L148): text`.
 - **Summary before the diagram.** If a section has only a diagram (no bullets or entries that explain it), put a 1–3 line paragraph BEFORE the diagram saying what it shows.
 - **Language of the original.** An English original stays in English.
-- **Verified by a hook.** `beautyfact_check.py` runs after every write of a `_beautyfact.md` file. It fixes bold « » and the `──▶` arrows by itself, and reports broken source links, subsections without 🔗, sections without a diagram, checkboxes the source does not have, numbers that do not match the diagram, diagrams that break a list, diagram lines over 74 characters, misaligned boxes, and bullets without an emoji. Fix only what it reports; do not write your own checking script.
-- **The source is mandatory.** `beautyfact_read_guard.py` runs after every read of either half of a beautyfact pair. The `_beautyfact.md` file is for the user's own reading, has no advantage for an agent, and never replaces the source: if it is read without the source, through additionalContext the hook tells the agent it still has to read the source. If the source is read first, it tells the agent the mirror is redundant and does not need reading too.
+- **Run the relink script first, every time.** Before writing a mirror, new or existing, run `beautyfact_relink.py <file_beautyfact.md>` (next to `beautyfact_check.py`; do not read its source). It records the source version the mirror will follow, shifts every source link of an existing mirror to the new line numbers, and prints a verdict:
+  - `no snapshot` or `rewrite`: write the whole mirror as above.
+  - `unchanged`: nothing to do; report the path.
+  - `edit`: read the mirror (it already has the new link numbers; you already have the source), plus the examples for the patterns of the listed sections. Edit only the listed «**sections to update**» and place any change no link covers in the section it belongs to. Every writing rule above still applies to each edited section. Then update what depends on the whole file: the legend's icons, and any count, overview, or coverage diagram that the change makes wrong. If the edits would touch most sections, write the whole mirror instead.
+- **Verified by a script.** Run `beautyfact_check.py` on the file you wrote (see the hard rule at the top). It fixes bold « » and the `──▶` arrows by itself and names every other problem it finds. `ok` means done.
 
 
 ## Load on demand

@@ -6,7 +6,9 @@ Runs after Write or Edit. When the file ends in `_beautyfact.md` it:
   2. checks each source link `(file.md#L10)` or `(file.md#L10-L20)`: the file and lines exist,
      and an entry's ID appears in the first linked line. Only `#L10` is generated now (VS Code
      and Cursor do not jump to GitHub's `#L10-L20` range fragment), but both are still accepted;
-  3. checks text diagrams: lines over MAX_WIDTH characters and misaligned box edges.
+  3. checks text diagrams: lines over MAX_WIDTH characters and misaligned box edges;
+  4. confirms the copy of the source that beautyfact_relink.py set aside in SNAPSHOT_DIR
+     beside the mirror, so the next relink compares against the version this mirror follows.
 
 Fixes are silent. Problems come back to the agent as additionalContext. It never blocks.
 Manual use: python beautyfact_check.py <file_beautyfact.md>
@@ -19,8 +21,11 @@ from pathlib import Path
 from urllib.parse import unquote
 
 SUFFIX = "_beautyfact.md"
+# Beside each mirror: the copy of its source from the last clean check (read by beautyfact_relink.py).
+SNAPSHOT_DIR = ".beautyfact"
 MAX_WIDTH = 74
 ARROW_LINE = re.compile(r"^(\s*- )(?:──▶ |→ )?(THEN|NOT|AND|Then|And|But)\b")
+LINK_MARK = "🔗"
 EMOJI = re.compile(r"[\U0001F300-\U0001FAFF☀-➿⭐]")
 CASE_LINE = re.compile(r"^- (?:\[.\] )?(?:\*\*)?(?:(?:GIVEN|WHEN|THEN|NOT|AND|Given|When|Then|And)\b|──▶|→)")
 QUOTED = re.compile(r"«([^»*]+)»")
@@ -139,18 +144,22 @@ def check_structure(path: Path, lines: list[str]) -> list[str]:
 
 
 def check_emojis(lines: list[str]) -> list[str]:
-    """Top-level bullets should carry an emoji for their type (WHEN/THEN lines are exempt)."""
-    fence, bare, total = False, [], 0
+    """Every top-level bullet carries a type emoji before its first 🔗 (WHEN/THEN lines are exempt).
+
+    🔗 marks a link, not a type, so it never counts. A bullet with no link may carry the
+    emoji anywhere (a quote marked 💬, for example).
+    """
+    fence, bare = False, []
     for n, line in enumerate(lines, 1):
         if line.lstrip().startswith("```"):
             fence = not fence
         elif not fence and line.startswith("- ") and not CASE_LINE.match(line):
-            total += 1
-            if not EMOJI.search(line):
+            if not EMOJI.search(line.split(LINK_MARK, 1)[0]):
                 bare.append(n)
-    if total and len(bare) * 100 // total > 20:
+    if bare:
         shown = ", ".join(str(n) for n in bare[:8])
-        return [f"{len(bare)} of {total} top-level bullets have no emoji (lines {shown}…): add one for their type"]
+        return [f"{len(bare)} top-level bullets have no type emoji before their 🔗 link (lines {shown}): "
+                f"add one for their type (📌 rule, 🧭 decision, 🎯 result…); an ID may come first, as in `- RF-04 📌 …`"]
     return []
 
 
@@ -210,10 +219,25 @@ def process(path: Path, fix: bool = True) -> list[str]:
     return check_links(path, fixed) + check_diagrams(fixed) + check_structure(path, fixed) + check_counts(fixed) + check_list_breaks(fixed)
 
 
+def save_snapshot(path: Path) -> None:
+    """The mirror was written: confirm the source copy beautyfact_relink.py set aside for it.
+
+    Without a pending copy nothing changes, so a hand check of a stale mirror cannot
+    make it look current.
+    """
+    if not path.name.endswith(SUFFIX):
+        return
+    snapshot = path.parent / SNAPSHOT_DIR / (path.name[: -len(SUFFIX)] + ".md")
+    pending = snapshot.with_name(snapshot.name + ".pending")
+    if pending.is_file():
+        pending.replace(snapshot)
+
+
 def main() -> None:
     args = [a for a in sys.argv[1:] if a != "--no-fix"]
     if args:
         problems = process(Path(args[0]), fix="--no-fix" not in sys.argv)
+        save_snapshot(Path(args[0]))
         print("\n".join(problems) or "ok")
         return
     payload = json.load(sys.stdin)
@@ -221,6 +245,7 @@ def main() -> None:
     if not target.name.endswith(SUFFIX) or not target.is_file():
         return
     problems = process(target)
+    save_snapshot(target)
     if problems:
         message = f"beautyfact_check found problems in {target.name}; fix them:\n" + "\n".join(problems[:20])
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": message}}))

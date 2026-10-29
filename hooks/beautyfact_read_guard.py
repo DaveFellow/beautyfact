@@ -41,7 +41,7 @@ def main() -> None:
         message = (
             f"{path.name} has a beautyfact mirror at {companion.name}, kept for human reading only "
             f"(it has no advantage for you). You already have the content from {path.name}; you do "
-            f"not need to also read {companion.name}."
+            f"not need to also read {companion.name} (only the beautyfact subagent updating it does)."
         )
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": message}}))
 

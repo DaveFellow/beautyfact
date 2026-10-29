@@ -7,6 +7,8 @@ alwaysApply: true
 
 The beautyfact process is a spec, a plan/design, a task list, or a test list in beautyfact format, and every `_beautyfact.md` mirror of a Markdown artifact, including when a hook asks for one.
 
+A mirror is only for a document the user reviews: one the companion hook asks for, or one the user names. Do not mirror any other file on your own initiative (agent instructions, templates, archived changes, READMEs, notes).
+
 If your instructions say you are the beautyfact subagent, execute that process. Do not delegate it.
 
 Every other agent:
