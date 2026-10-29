@@ -30,9 +30,4 @@ The parent passes the ask and the paths. It does not pass the file body. Read th
 
 ## Report back
 
-Return a short report the parent can relay. Do not paste the artifact; the file is the delivery.
-
-- Paths of the files you wrote
-- For a mirror: the section ──▶ example files mapping
-- Checker problems you fixed, and any still open
-- Traceability gaps or open questions, in one or two lines
+Return one line: the path written, or the error that stopped the write. Do not paste the artifact. Do not include a section mapping, checker notes, or open questions. The parent only notifies completion.

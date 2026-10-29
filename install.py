@@ -3,10 +3,13 @@
 
 Usage: python3 install.py [target-project-dir]   (default: current directory)
 
+This script covers Claude Code and Cursor only. Other harnesses are
+listed in the README install map.
+
 Copies the skill to <target>/.claude/skills/beautyfact/ and the hooks to
 <target>/.claude/hooks/, then adds them to <target>/.claude/settings.json.
-Also copies the beautyfact subagent to <target>/.cursor/agents/ and
-<target>/.claude/agents/, and the Cursor rule that forces delegation to
+Also copies agents/beautyfact.md to <target>/.cursor/agents/ and
+<target>/.claude/agents/, and rules/beautyfact-subagent.mdc to
 <target>/.cursor/rules/. Safe to run again: existing hook entries are not
 duplicated, and the old settings.json is saved as settings.json.bak before
 it changes.
@@ -34,8 +37,8 @@ def copy_files(target: Path, claude: Path) -> None:
     (claude / "hooks").mkdir(parents=True, exist_ok=True)
     for name, _, _ in HOOKS:
         shutil.copy2(KIT / "hooks" / name, claude / "hooks" / name)
-    agent = KIT / ".cursor" / "agents" / "beautyfact.md"
-    rule = KIT / ".cursor" / "rules" / "beautyfact-subagent.mdc"
+    agent = KIT / "agents" / "beautyfact.md"
+    rule = KIT / "rules" / "beautyfact-subagent.mdc"
     for dest in (target / ".cursor" / "agents", claude / "agents"):
         dest.mkdir(parents=True, exist_ok=True)
         shutil.copy2(agent, dest / "beautyfact.md")

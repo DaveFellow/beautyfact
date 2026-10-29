@@ -47,26 +47,54 @@ Same two requirements, nothing added or cut — just drawn so the relation
 
 ## 3. ⚙️ Install
 
+The kit does not live under a harness folder. Sources are `agents/beautyfact.md`, `rules/beautyfact-subagent.mdc`, `skills/beautyfact/`, and `hooks/`. Copy each into the directories for the harness you are installing.
+
 **Clone this repo in your project's folder and ask your agent:** «Install this kit and adapt the hooks to my harness.»
 
-**Claude Code, direct:**
+That agent uses the map in the next section. Keep the rule text, and switch on whatever frontmatter that harness needs so the rule is always on (Cursor `alwaysApply`, Copilot `applyTo: "**"`, Windsurf `always_on`, Continue `alwaysApply`). The hook scripts speak Claude Code's protocol; register the same three behaviors in the harness's own hook file.
+
+**Claude Code and Cursor, direct:**
 
 ```bash
 python3 install.py /path/to/your/project
 ```
 
-Re-run to update — hooks never duplicate; `settings.json` is backed up.
+That script installs the Claude Code skill, agent, and hooks, and copies the agent and rule for Cursor. Re-run to update — hooks never duplicate; `settings.json` is backed up. Every other harness is installed from the map.
 
 ## 4. 📁 What goes where
 
-| Kit file | Installed to | Role |
-|---|---|---|
-| `skills/beautyfact/` | `.claude/skills/beautyfact/` | Format rules + examples |
-| `.cursor/agents/beautyfact.md` | `.cursor/agents/` and `.claude/agents/` | The only agent that runs the process |
-| `.cursor/rules/beautyfact-subagent.mdc` | `.cursor/rules/` | Parent always delegates to that agent |
-| `beautyfact_companion.py` | `.claude/hooks/` | On `Write`: tells the parent to delegate the mirror |
-| `beautyfact_check.py` | `.claude/hooks/` | On mirror write/edit: fixes & flags notation |
-| `beautyfact_read_guard.py` | `.claude/hooks/` | On `Read`: source stays mandatory |
+| Kit file | Role |
+|---|---|
+| `skills/beautyfact/` | Format rules + examples |
+| `agents/beautyfact.md` | The only agent that runs the process |
+| `rules/beautyfact-subagent.mdc` | Parent always delegates to that agent |
+| `hooks/beautyfact_companion.py` | On write: tells the parent to delegate the mirror |
+| `hooks/beautyfact_check.py` | On mirror write/edit: fixes and flags notation |
+| `hooks/beautyfact_read_guard.py` | On read: the source stays mandatory |
+
+A root `AGENTS.md` is read by Cursor, Copilot, Codex, Windsurf, Cline, Roo Code, OpenCode, Amp, Goose, Zed, Junie, and Kilo Code. Put the delegation rule there when you want one shared copy. Still add the native file below when that harness does not treat `AGENTS.md` as its only rules file.
+
+| Harness | Rule | Subagent | Skill | Hooks |
+|---|---|---|---|---|
+| Cursor | `.cursor/rules/*.mdc` | `.cursor/agents/` | `.cursor/skills/` | `.cursor/hooks.json` |
+| Claude Code | `.claude/rules/*.md` | `.claude/agents/` | `.claude/skills/` | `.claude/settings.json` |
+| GitHub Copilot | `.github/instructions/*.instructions.md` | `.github/agents/*.agent.md` | `.agents/skills/` | `.github/hooks/*.json` |
+| Codex | `AGENTS.md` | `.codex/agents/` | `.agents/skills/` | `.codex/hooks.json` |
+| Windsurf | `.windsurf/rules/*.md` | — | — | — |
+| Cline | `.clinerules/` | — | — | — |
+| Roo Code | `.roo/rules/` | — | — | — |
+| Continue | `.continue/rules/*.md` | — | — | — |
+| Gemini CLI | `GEMINI.md` | — | `.agents/skills/` | — |
+| OpenCode | `AGENTS.md` | `.opencode/agents/` | `.opencode/skills/` | — |
+| Amp | `AGENTS.md` | — | `.agents/skills/` | — |
+| Kilo Code | `.kilo/rules/*.md` | — | — | — |
+| Junie | `.junie/AGENTS.md` | — | — | — |
+| Kiro | `.kiro/steering/*.md` | — | — | — |
+| Amazon Q | `.amazonq/rules/*.md` | — | — | — |
+| Goose, Zed | `AGENTS.md` | — | — | — |
+| Aider | `CONVENTIONS.md` (load it with `--read` or `read:` in `.aider.conf.yml`) | — | — | — |
+
+Claude Code also reads `CLAUDE.md`. Copilot also reads `.github/copilot-instructions.md`. Cline also reads `.cline/rules/`. Aider has no always-on rules file, so the conventions file has to be loaded on purpose. Where the subagent column is empty, the rule file carries the same delegation text.
 
 ## 5. 🔄 How the mirror gets built
 
@@ -95,6 +123,6 @@ the diagram can't show.
 ## 6. 🔧 Settings
 
 - **Watched folders:** `WATCHED_ROOTS` (`openspec`, `.specify`, `specs`) and `WATCHED_ANYWHERE` (`acceptance`) in `beautyfact_companion.py`.
-- **Per project only.** The hooks find the project root from their own location, so they do not work from `~/.claude`.
-- **Check by hand:** `python3 .claude/hooks/beautyfact_check.py path/to/file_beautyfact.md`.
+- **Per project only.** The hooks find the project root from their own location, so they do not work from a home-directory config.
+- **Check by hand:** `python3 .claude/hooks/beautyfact_check.py path/to/file_beautyfact.md` (or the same script from the harness hooks directory).
 - **Needs** Python 3.9 or newer.
