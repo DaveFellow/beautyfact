@@ -3,6 +3,8 @@
 > A skill, a subagent, and 3 hooks that mirror each spec `.md` you review
 > into a diagram-first version. The process always runs in the beautyfact
 > subagent. Original untouched.
+>
+> ***DISCLAIMER:** This kit was mostly tested using Sonnet 5.5 in Claude Code and optimized for Anthropic models, it works pretty well there so use it for this task. While it works in other agents, Grok 4.7 High in Cursor looked to be inneficient running it, but maybe my test setup was way too biased and as this is a personal tool I didn't care too much about it so you can do your tests and report your findings.*
 
 **Legend:** 📌 rule · ⚠️ edge case · 🔗 source line
 
