@@ -1,6 +1,6 @@
 # Generating spec, plan, tasks and test list
 
-Loaded from `SKILL.md` only when one of these artifacts is requested from scratch. The principles, ASCII rules and WHEN/THEN format live in `SKILL.md`.
+Loaded from `SKILL.md` only when one of these artifacts is requested from scratch. The principles and WHEN/THEN format live in `SKILL.md`; the diagram rules in the file its diagram style names.
 
 ## Traceability
 
@@ -105,7 +105,7 @@ Rules:
 2. If the artifacts are requested together, respect the order spec ──▶ plan ──▶ tasks ──▶ tests and keep the IDs consistent.
 3. Write, draw, and complement section by section with the format above.
 4. Review before delivering:
-   - Does each structured section have its diagram, and is it aligned?
+   - Does each structured section have its diagram, and does it follow the diagram rules?
    - Does each important RF have a task and a test?
    - Is the ~200-line limit respected?
    - Is anything invented without being marked as a proposal or estimate?

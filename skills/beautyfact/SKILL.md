@@ -1,11 +1,13 @@
 ---
 name: beautyfact
-description: Procedure for the beautyfact subagent. It generates spec, plan/design, task list, and test list artifacts in a segmented, light format with ASCII diagrams, and the `<name>_beautyfact.md` mirror of a Markdown artifact (OpenSpec, Spec Kit, or plain docs). Any other agent delegates that process to the beautyfact subagent and does not execute this skill.
+description: Procedure for the beautyfact subagent. It generates spec, plan/design, task list, and test list artifacts in a segmented, light format with diagrams (Mermaid or ASCII), and the `<name>_beautyfact.md` mirror of a Markdown artifact (OpenSpec, Spec Kit, or plain docs). Any other agent delegates that process to the beautyfact subagent and does not execute this skill.
 ---
 
 # Beautyfact
 
 **Who executes this.** Only the beautyfact subagent. If your instructions name you that subagent, follow the rest of this file and do not delegate. Any other agent stops here: delegate once, in the foreground, to the beautyfact subagent (`subagent_type: beautyfact`), pass the request and the file paths, and wait. Do not read the examples. Do not write the file.
+
+**Diagram style: Mermaid.** Diagram rules: `references/diagrams-mermaid.md`. Examples: `references/examples-mermaid/`.
 
 **Hard rule: mechanical work stays in the tool.** Counting characters, aligning columns, checking a line's width, checking that a link's file and line exist, wrapping « » in bold, and rewriting a short arrow to `──▶` are mechanical. `beautyfact_check.py` does them. Run that script. Do not read its source. Do not reimplement it in a shell script, a private checker, or by printing indexes. Do not measure again something the script already reported. The same rule covers every mechanical task: if a script or hook already does it, run that and do not redo it by hand. After it runs, change only the lines it names.
 
@@ -15,7 +17,7 @@ The four artifacts (spec, plan/design, task list, test list) share one style and
 
 **Style examples (mandatory step).** The quality of a `_beautyfact` file comes from copying real examples. Before writing anything:
 1. List the sections of the source and the pattern each one has (use the table below).
-2. Read EVERY example file the table gives for those patterns, plus `opener.md` and `entries.md` always, in one batch (each is about 1 KB; reading fewer than the table says is the main cause of poor output).
+2. Read the diagram rules file and EVERY example file the table gives for those patterns, plus `opener.md` and `entries.md` always, in one batch, from the example folder the diagram style names (each is about 1 KB; reading fewer than the table says is the main cause of poor output).
 3. If the source is an OpenSpec or Spec Kit artifact, also read `references/source-formats.md`: it says which diagram to draw for each source section (a small diagram per decision, trees for capabilities and impact). Skipping it makes the file much less graphic.
 4. Start your reply or file with nothing else until they are read. Keep the section ──▶ pattern list from step 1 as your plan; it does not go in the report.
 
@@ -42,7 +44,7 @@ Copy their shape: a short summary, a diagram for every structured section, entri
 
 1. **Light on the mind.** One idea per block. Paragraphs of 1–2 sentences. If something is clearer drawn, draw it.
 2. **Segmented.** Numbered sections (`## N. Title`) and emoji subsections (`### 🔄 Title`). No walls of text.
-3. **Graphic before prose.** Every section with structure (flow, relation, hierarchy, sequence, states) gets an ASCII diagram; prose only complements what the diagram does not say.
+3. **Graphic before prose.** Every section with structure (flow, relation, hierarchy, sequence, states) gets a diagram; prose only complements what the diagram does not say.
 4. **Complement, do not repeat.** After the diagram, add 2–5 bullets with what is missing (rules, limits, risks, indexes, decisions). Do not explain in text what the drawing already shows.
 5. **Size.** Aim for ~200 lines per generated artifact. If it goes over, cut tables to bullets, merge sections, and drop low-value detail. If the user asks for «normal» or «short», lower the detail without dropping the format. This limit never applies to a `_beautyfact` version, which must keep everything (see its rules).
 6. **Language.** The user's language (default English, per the project rules). IDs and code paths stay as they are. When converting an existing artifact, use the artifact's own language.
@@ -62,37 +64,13 @@ Apply these in every artifact and every `_beautyfact` version, even when the sou
 - **«Quoted names»:** names of entities, UI labels, statuses, scenarios and named values go between « and », with the text in bold and the marks plain: `«**Login screen**»`. Not inside diagrams (code blocks).
 - **Titles of acceptance criteria and scenarios** start with 🎯: `- 🎯 **Add a unit** 🔗 [L62]`.
 - **Backticks:** code, paths, commands, identifiers and literal values.
-- **Arrows:** one arrow style everywhere: the long `──▶` in diagrams and on every WHEN/THEN line after the first. Vertical and backward arrows are `▼ ▲ ◀`. Never the short `→ ← ↑ ↓`.
+- **Arrows:** one arrow style everywhere: the long `──▶` in prose, in `text` diagrams and on every WHEN/THEN line after the first. Mermaid diagrams use Mermaid's own arrows. Vertical and backward arrows are `▼ ▲ ◀`. Never the short `→ ← ↑ ↓`.
 - **Emoji on every bullet.** Every top-level bullet starts with an emoji for its type: 📌 rule · ⚠️ edge case · 🖱️ user action · 🎯 result · 💬 UI text · 🔒 security · 🧭 decision · ❓ question. An entry with an ID carries its type emoji right before or right after the ID, always before the title and the 🔗 link: `- RF-04 📌 (M) 🔗 …`, `- D1 🧭 «**Writer**» 🔗 …`, `- ❓ Q1 🔗 …`. 🔗 marks a link, never the type. A bullet that is mostly a quote may carry its 💬 inline instead. Sub-bullets get one only when they quote UI text (💬) or add a link (🔗). A bullet with no fitting type gets 📌.
 - **Checkboxes:** `- [ ]` and a closing checkbox summary only when the source has approval state. Never invent them.
 
-## ASCII rules
+## Diagram rules
 
-- Always inside a code block with language `text` (monospace).
-- **No emojis inside diagrams with aligned columns** (their width varies). Emojis go in headings and bullets.
-- Align by counting characters: define columns by index and pad with spaces; verify that the verticals `│`, arrows `▼ ▲ ▶ ◀` and corners `┌ ┐ └ ┘` land in the same column.
-- Allowed characters: `─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ▶ ◀ ▲ ▼ ◆ ▓`.
-- At most 74 characters wide (the hook checks it) and ~15 lines per diagram. If it does not fit, split it in two.
-- Pick the diagram by the shape of the content:
-
-| Content | Diagram |
-| --- | --- |
-| General idea, components | Tree mind map |
-| Layers, who calls whom | Stacked boxes joined by `▼ ▲` and a short label ("calls") |
-| Entities and relations | Tree with `<` for «many» |
-| Steps with decisions | Flowchart with `?` and yes/no branches, drawn vertically |
-| States of an object, step by step | State strip: one row per step, `[>]` current, `[x]` done, `[ ]` pending |
-| Client ◀──▶ server, concurrent actors | Sequence with 2–4 verticals; `┼` where an arrow crosses a vertical |
-| Inside / outside, goals / non-goals | Two aligned columns under underlined headers |
-| Effort, proportion, counts | Bars with `▓` plus the item IDs |
-| Items ──▶ what covers them | Aligned rows `item  ──▶  where it is handled` |
-| Merging inputs into a pipeline | Branches joined with `┐ ├ ┘`, then a vertical `▼` chain |
-| Risk ──▶ mitigation | One row per risk: `risk  ──▶  mitigation` |
-| Files and folders | Tree with the purpose of each entry |
-| Phases and gates | Line with `──▶` and `◆` for gates |
-| Screens | Navigation map and box mockup |
-
-Each pattern has an example file in `references/examples/` (table at the top of this file).
+The diagram style line at the top names the rules file and the example folder. Follow that rules file for every diagram: which kind of diagram fits each content, and the syntax to keep to. Each pattern in the table at the top has an example file in that folder.
 
 ## WHEN/THEN format
 
@@ -133,7 +111,7 @@ The user or a hook asks for it; this subagent writes it. It is a visual redesign
 
 - Write the file next to the original, with the suffix `_beautyfact` before `.md`. Do not touch the original.
 - Keep every ID, requirement, decision, and criterion; add no new content and invent nothing that is missing.
-- Apply the principles and ASCII rules above (numbered sections, diagram + 2–5 bullets). The ~200-line limit yields to the completeness rule below.
+- Apply the principles and the diagram rules (numbered sections, diagram + 2–5 bullets). The ~200-line limit yields to the completeness rule below.
 - If the original is very short or has no structure to draw, keep only the segmented format and do not force diagrams.
 - An `_beautyfact` version never generates another version.
 
@@ -171,4 +149,4 @@ The user or a hook asks for it; this subagent writes it. It is a visual redesign
 
 - **Writing a spec, plan/design, task list, or test list from scratch:** read `references/generate.md` (templates, traceability, workflow, adjustments).
 - **Converting an artifact and its format is OpenSpec or Spec Kit:** read `references/source-formats.md` (which diagram fits each source section).
-- **Always, before writing a `_beautyfact` file:** the matching files in `references/examples/` (table at the top of this file).
+- **Always, before writing a `_beautyfact` file:** the diagram rules file and the matching example files from the folder the diagram style names (table at the top of this file).

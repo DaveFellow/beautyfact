@@ -1,4 +1,4 @@
-# Pattern: goals / non-goals or in / out as two aligned columns
+# Pattern: goals / non-goals or in / out as a two-column table
 
 Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
@@ -6,13 +6,11 @@ Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
 🔗 Source: [Context L13–L18](design.md#L13) · [Goals / Non-Goals L20–L30](design.md#L20)
 
-```text
- GOALS                                  NON-GOALS
- ─────────────────────────────────────  ──────────────────────────
- Rules in src/core, no VS Code or disk  No second store or network
- Parallel CLI calls lose no update      No bundler
- No config command without consent      No task breakdown (tasks.md)
-```
+| Goals | Non-goals |
+| --- | --- |
+| Rules in `src/core`, no VS Code or disk | No second store or network |
+| Parallel CLI calls lose no update | No bundler |
+| No config command without consent | No task breakdown (`tasks.md`) |
 
 - 📌 Every business rule lives in `src/core`, testable without VS Code or the disk.
 - 📌 Two parallel CLI calls never lose an update. A command from a config file never runs without trust and consent.

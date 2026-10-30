@@ -15,18 +15,11 @@ Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
 Six groups to approve, with their entry counts.
 
-```text
- Foundations              ▓▓▓▓    4
- State and writes         ▓▓▓▓    4
- Probes and sync          ▓▓▓     3
- Panel                    ▓▓      2
- Distribution, adapters   ▓▓      2
- Security                 ▓▓▓▓▓▓  6
-```
-
-- 📌 Foundations (D9, D10, D11, D21)
-- 📌 State and writes (D12–D15)
-- 📌 Probes and sync (D16, D17, D22)
-- 📌 Panel (D18, D19)
-- 📌 Distribution and adapters (D20, D23)
-- 📌 Security (S1–S6)
+| Group | Entries | Count |
+| --- | --- | --- |
+| Foundations | D9, D10, D11, D21 | ▓▓▓▓ 4 |
+| State and writes | D12–D15 | ▓▓▓▓ 4 |
+| Probes and sync | D16, D17, D22 | ▓▓▓ 3 |
+| Panel | D18, D19 | ▓▓ 2 |
+| Distribution and adapters | D20, D23 | ▓▓ 2 |
+| Security | S1–S6 | ▓▓▓▓▓▓ 6 |
