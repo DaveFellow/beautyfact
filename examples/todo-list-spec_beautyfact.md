@@ -15,11 +15,11 @@ per record** (RF-09), not per field, and deleting a list never deletes
 its tasks (RF-05/RF-07). The conflict walkthrough in «**Edge cases**»
 is the clearest place to see both rules collide.
 
-```text
- sync rule   ──▶ last write wins, whole record, by updated_at
- list delete ──▶ tasks move to Inbox, never deleted
- both meet   ──▶ 🧭 conflict walkthrough, section 9
-```
+| Rule | Effect |
+| --- | --- |
+| Sync | Last write wins, whole record, by `updated_at` |
+| List delete | Tasks move to Inbox, never deleted |
+| Both meet | 🧭 conflict walkthrough, section 9 |
 
 ## 1. 🎯 Summary
 
@@ -28,8 +28,9 @@ is the clearest place to see both rules collide.
 A single-user to-do app, offline-first, syncing across devices once the
 connection returns.
 
-```text
- user ──▶ add task ──▶ queued if offline ──▶ synced on reconnect
+```mermaid
+flowchart LR
+  user(["user"]) --> add["add task"] --> queue["queued if offline"] --> sync["synced on reconnect"]
 ```
 
 - 🎯 95% of offline tasks sync in ≤ 5s of reconnecting.
@@ -40,14 +41,12 @@ connection returns.
 
 🔗 Source: [todo-list-spec.md L14–L28](todo-list-spec.md#L14)
 
-```text
- IN                                     OUT
- ─────────────────────────────────────  ──────────────────────────
- Create / edit / complete / delete      Sharing lists or tasks
- Lists ("Work", "Personal")             Sub-tasks / checklists
- Due dates and reminders                Calendar integrations
- Offline use + background sync
-```
+| In | Out |
+| --- | --- |
+| Create / edit / complete / delete | Sharing lists or tasks |
+| Lists («**Work**», «**Personal**») | Sub-tasks / checklists |
+| Due dates and reminders | Calendar integrations |
+| Offline use + background sync | |
 
 - 📌 Platforms: iOS, Android, responsive web.
 - 📌 Stack: Node.js backend, React Native (mobile), React (web).
@@ -56,14 +55,10 @@ connection returns.
 
 🔗 Source: [todo-list-spec.md L30–L44](todo-list-spec.md#L30)
 
-```text
- open app ──▶ land on Inbox ──▶ Add task ──▶ title (+due, +list)
-                                                  │
-                                                  ▼
-                              pending, top of list ──▶ check ──▶ done
-                                                              (collapses
-                                                               into
-                                                               Completed)
+```mermaid
+flowchart TD
+  open(["open app"]) --> inbox["land on Inbox"] --> add["Add task"] --> title["title (+due, +list)"]
+  title --> pending["pending, top of list"] --> check["check"] --> done["done<br/>(collapses into Completed)"]
 ```
 
 - 📌 Secondary: new list from the sidebar with a color.
@@ -75,11 +70,11 @@ connection returns.
 
 Ten requirements in three groups: tasks, lists, offline/sync.
 
-```text
- Tasks            ▓▓▓▓  RF-01…RF-04
- Lists            ▓▓▓   RF-05…RF-07
- Offline, sync     ▓▓▓  RF-08…RF-10
-```
+| Group | Count | Requirements |
+| --- | --- | --- |
+| Tasks | ▓▓▓▓ | RF-01 to RF-04 |
+| Lists | ▓▓▓ | RF-05 to RF-07 |
+| Offline, sync | ▓▓▓ | RF-08 to RF-10 |
 
 - 📌 RF-01 (M) Create task: title required, due date and list optional
   🔗 [L49](todo-list-spec.md#L49)
@@ -100,31 +95,40 @@ Ten requirements in three groups: tasks, lists, offline/sync.
 
 🔗 Source: [todo-list-spec.md L68–L81](todo-list-spec.md#L68)
 
-```text
- Performance    ──▶ list renders < 300ms up to 1,000 tasks
- Offline        ──▶ fully usable, no operation blocks on network
- Sync           ──▶ queue applies in ≤ 5s, in creation order
- Security       ──▶ HTTPS only, tasks scoped to the owning user
- Accessibility  ──▶ 44x44pt touch targets, screen-reader support
- Compatibility  ──▶ iOS 15+, Android 10+, last 2 browser versions
-```
+| Area | Requirement |
+| --- | --- |
+| Performance | List renders < 300ms up to 1,000 tasks |
+| Offline | Fully usable, no operation blocks on network |
+| Sync | Queue applies in ≤ 5s, in creation order |
+| Security | HTTPS only, tasks scoped to the owning user |
+| Accessibility | 44x44pt touch targets, screen-reader support |
+| Compatibility | iOS 15+, Android 10+, last 2 browser versions |
 
 ## 6. 🧱 Data model
 
 🔗 Source: [todo-list-spec.md L83–L101](todo-list-spec.md#L83)
 
-```text
- List < Task        List ──▶ many Task
-                     Task ──▶ exactly one List
- Task: id, title, done, due_date, list_id,
-       created_at, updated_at, deleted_at
- List: id, name, color, is_default, created_at
+```mermaid
+flowchart LR
+  list["List"] -->|"1"| task["Task"]
+  task -->|"many"| list
 ```
+
+| Entity | Fields |
+| --- | --- |
+| Task | `id`, `title`, `done`, `due_date`, `list_id`, `created_at`, `updated_at`, `deleted_at` |
+| List | `id`, `name`, `color`, `is_default`, `created_at` |
+
+- 📌 A list has many tasks; a task belongs to exactly one list.
 
 ### 🔄 Task lifecycle 🔗 [L94–L95](todo-list-spec.md#L94)
 
-```text
- pending ◀──▶ done ──▶ deleted (soft, 30d) ──▶ purged
+```mermaid
+stateDiagram-v2
+  pending --> done
+  done --> pending
+  done --> deleted
+  deleted --> purged
 ```
 
 - 📌 A deleted list's tasks are reassigned to Inbox, never orphaned
@@ -137,14 +141,18 @@ Ten requirements in three groups: tasks, lists, offline/sync.
 
 🔗 Source: [todo-list-spec.md L103–L120](todo-list-spec.md#L103)
 
-```text
- client                                              server
-    │── POST /sync {since, ops[]} ──────────────────▶│
-    │◀── {server_time, applied[], conflicts[]} ──────│
-    │── GET /tasks (first login, 30d+ offline) ──────▶│
-    │◀── full task list ──────────────────────────────│
-    │── PATCH /tasks/:id (single edit, online) ──────▶│
+```mermaid
+sequenceDiagram
+  participant c as client
+  participant s as server
+  c->>s: POST /sync (since, ops)
+  s-->>c: server_time, applied, conflicts
+  c->>s: GET /tasks (first login, 30d+ offline)
+  s-->>c: full task list
+  c->>s: PATCH /tasks/:id (single edit, online)
 ```
+
+- 📌 Deleted tasks stay soft-deleted for 30 days, then are purged 🔗 [L94–L95](todo-list-spec.md#L94)
 
 - 📌 Error format: `{ error: { code, message } }` 🔗 [L117](todo-list-spec.md#L117)
 - 📌 Conflicts resolved last-write-wins by `updated_at`; the losing edit
@@ -155,10 +163,11 @@ Ten requirements in three groups: tasks, lists, offline/sync.
 
 🔗 Source: [todo-list-spec.md L122–L140](todo-list-spec.md#L122)
 
-```text
- Sidebar ──▶ List view ──▶ (tap task) ──▶ Task detail
-               ▲
-          "+" on every list screen
+```mermaid
+flowchart LR
+  side["Sidebar"] --> list["List view"]
+  list -->|"tap task"| detail["Task detail"]
+  add["+ on every list screen"] --> list
 ```
 
 ```text
@@ -184,15 +193,14 @@ Ten requirements in three groups: tasks, lists, offline/sync.
 Most complex case: the same task edited offline on two devices before
 either syncs.
 
-```text
-                   due_date   title     synced?
- 1 A edits (off)   [x]        [ ]       [ ]
- 2 B edits (off)   [ ]        [x]       [ ]
- 3 A reconnects    [x]        [ ]       [x]   server now = A
- 4 B reconnects    [ ]        [x]       [x]   B wins whole record,
-                                               A's due_date is lost
-                                               ──▶ returned in conflicts
-```
+`[x]` edited · `[ ]` untouched
+
+| Step | due_date | title | synced? | Note |
+| --- | --- | --- | --- | --- |
+| 1 A edits (offline) | [x] | [ ] | [ ] | |
+| 2 B edits (offline) | [ ] | [x] | [ ] | |
+| 3 A reconnects | [x] | [ ] | [x] | Server now = A |
+| 4 B reconnects | [ ] | [x] | [x] | B wins whole record, A's `due_date` is lost ──▶ returned in `conflicts` |
 
 - ⚠️ Last-write-wins is per **record**, not per field: B's sync
   overwrites A's due date even though B only touched the title
@@ -209,12 +217,12 @@ either syncs.
 
 🔗 Source: [todo-list-spec.md L168–L185](todo-list-spec.md#L168)
 
-```text
- CA-01  Title only            ──▶ RF-01
- CA-02  Delete with undo      ──▶ RF-04
- CA-03  Create offline, sync  ──▶ RF-08, RF-09
- CA-04  Inbox cannot delete   ──▶ RF-07
-```
+| Criterion | Covers |
+| --- | --- |
+| CA-01 Title only | RF-01 |
+| CA-02 Delete with undo | RF-04 |
+| CA-03 Create offline, sync | RF-08, RF-09 |
+| CA-04 Inbox cannot delete | RF-07 |
 
 - [ ] 🎯 **Create a task with only a title** (RF-01) 🔗 [L170–L172](todo-list-spec.md#L170)
   - WHEN the user adds a task with just a title, no due date or list

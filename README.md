@@ -14,9 +14,9 @@ Specs are correct and unreadable. This kit fixes the latter.
 
 Every time a document you should review lands (an OpenSpec change, a Spec Kit feature artifact, an acceptance checklist), beautyfact writes a sibling `<name>_beautyfact.md`: same content, zero loss, redrawn with diagrams and icons so a human skims it in seconds. Diagrams are Mermaid by default (cheaper, drawn by your editor) or hand-aligned ASCII (readable anywhere).
 
-```text
- specs/foo.md          ──▶  specs/foo_beautyfact.md
- (source, untouched)        (mirror, diagram-first)
+```mermaid
+flowchart LR
+  src["specs/foo.md<br/>(source, untouched)"] --> mirror["specs/foo_beautyfact.md<br/>(mirror, diagram-first)"]
 ```
 
 - 📌 The mirror never replaces the source — a read-time hook enforces that.
@@ -26,20 +26,22 @@ Every time a document you should review lands (an OpenSpec change, a Spec Kit fe
 
 The same two requirements, before and after. Nothing is added or cut: the relation requirement ──▶ behavior is drawn, so it reads at a glance.
 
-```text
+```markdown
                               specs/foo.md (source)
 ## 3. Requirements
 - RF-01: User can create a task offline.
 - RF-02: Offline tasks sync when connection returns.
 ```
 
-```text
+```markdown
                       specs/foo_beautyfact.md (mirror)
 ## 3. 📋 Requirements
 🔗 Source: [foo.md L10–L13](foo.md#L10)
 
- RF-01  Create task offline   ──▶ allowed
- RF-02  Offline sync          ──▶ on reconnect
+| Requirement | Behavior |
+| --- | --- |
+| RF-01 Create task offline | Allowed |
+| RF-02 Offline sync | On reconnect |
 
 - RF-01 📌 🔗 [L11](foo.md#L11): User can create a task offline.
 - RF-02 📌 🔗 [L12](foo.md#L12): Offline tasks sync when connection
@@ -50,16 +52,18 @@ The same two requirements, before and after. Nothing is added or cut: the relati
 
 Two ways in. Both ask you «**automatic**» or «**manual**» first, then «**Mermaid**» or «**ASCII**» diagrams.
 
-```text
-                     ┌─ any harness ───────▶ A. give your agent the URL
- install beautyfact ─┤
-                     └─ Claude Code/Cursor ▶ B. run install.py yourself
-
- automatic ──▶ each document to review gets its mirror when written
- manual    ──▶ only when you call /beautyfact path/to/file.md
- mermaid   ──▶ default: fewer tokens, needs a Mermaid preview
- ascii     ──▶ more tokens, readable in any viewer or terminal
+```mermaid
+flowchart LR
+  install(["install beautyfact"]) -->|"any harness"| a["A. give your agent the URL"]
+  install -->|"Claude Code, Cursor"| b["B. run install.py yourself"]
 ```
+
+| Choice | Effect |
+| --- | --- |
+| Automatic | Each document to review gets its mirror when written |
+| Manual | Only when you call `/beautyfact path/to/file.md` |
+| Mermaid | Default: fewer tokens, needs a Mermaid preview |
+| ASCII | More tokens, readable in any viewer or terminal |
 
 | | Mermaid (default) | ASCII |
 | --- | --- | --- |
@@ -119,21 +123,15 @@ python3 /tmp/beautyfact/install.py /path/to/your/project  # asks a/m, then M/a
 
 ## 5. 🔄 How the mirror gets built
 
-```text
- Write review doc ──▶ companion hook ──▶ parent delegates to the subagent
- (manual: /beautyfact file.md ────────▶ parent delegates to the subagent)
-                                        │
-                                        ▼
-        subagent runs relink, studies SKILL.md examples (parent does not)
-                                        │
-                                        ▼
-            section ──▶ source link + diagram + bullets (no repeats)
-                                        │
-                                        ▼
-        _beautyfact.md written ──▶ check hook fixes/flags notation
-                                        │
-                                        ▼
-            read_guard: mirror read ──▶ still must read source
+```mermaid
+flowchart TD
+  write(["Write review doc"]) --> comp["companion hook"] --> deleg["parent delegates to the subagent"]
+  manual(["manual: /beautyfact file.md"]) --> deleg
+  deleg --> sub["subagent runs relink, studies SKILL.md examples<br/>(parent does not)"]
+  sub --> sec["section: source link + diagram + bullets (no repeats)"]
+  sec --> out["_beautyfact.md written"]
+  out --> check["check hook fixes and flags notation"]
+  check --> guard["read_guard: mirror read still needs the source"]
 ```
 
 - 📌 Specs, plans, task lists, and test lists written in this format go to the same subagent.
@@ -146,19 +144,12 @@ python3 /tmp/beautyfact/install.py /path/to/your/project  # asks a/m, then M/a
 
 Only the ones you review. Everything else needs a `/beautyfact` call.
 
-```text
- gets a mirror                       never
- ─────────────                       ─────
- openspec/changes/<change>/          openspec/changes/archive/
-   proposal, design, tasks,          openspec/specs/
-   specs/*/spec                      openspec/AGENTS.md, project.md
- specs/<feature>/                    .specify/templates/
-   spec, plan, research, tasks,      READMEs, notes, any other .md
-   data-model, quickstart,
-   contracts/, checklists/
- .specify/memory/constitution.md
- any .md in an acceptance/ folder
-```
+| Gets a mirror | Never |
+| --- | --- |
+| `openspec/changes/<change>/`: proposal, design, tasks, `specs/*/spec` | `openspec/changes/archive/` |
+| `specs/<feature>/`: spec, plan, research, tasks, data-model, quickstart, `contracts/`, `checklists/` | `openspec/specs/` |
+| `.specify/memory/constitution.md` | `openspec/AGENTS.md`, `project.md` |
+| Any `.md` in an `acceptance/` folder | `.specify/templates/`, READMEs, notes, any other `.md` |
 
 - 📌 The lists live in `beautyfact_companion.py`: `WATCHED_ROOTS`, `REVIEW_NAMES`, `REVIEW_DIRS`, `WATCHED_ANYWHERE`, and `SKIP_DIRS`.
 - ⚠️ `openspec/specs/` is rewritten when a change is archived, so nobody reviews it there.
