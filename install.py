@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Install the beautyfact skill, subagent, and three hooks into a project.
 
-Usage: python3 install.py [--auto | --manual] [target-project-dir]
+Usage: python3 install.py [--auto | --manual] [--mermaid | --ascii] [target-project-dir]
        (default target: current directory)
 
 Asks whether mirrors are made automatically (the companion hook asks for one
 each time a document to review is written) or only when you call the skill
 yourself (/beautyfact <file>). --auto / --manual answer it up front; without a
 terminal one of them is required.
+
+Then asks the diagram style: Mermaid (the default, and cheaper in tokens) or
+hand-aligned ASCII. --mermaid / --ascii answer it up front; without a
+terminal it stays Mermaid. The answer is written into the installed SKILL.md.
 
 This script covers Claude Code and Cursor only. Other harnesses are
 listed in HARNESS.md.
@@ -41,6 +45,24 @@ HOOKS = (
 TOOLS = ("beautyfact_relink.py",)
 # Copies of each source kept beside its mirror by beautyfact_check.py.
 IGNORE = ".beautyfact/"
+# The line of SKILL.md that names the diagram rules and examples; the kit ships MERMAID.
+MERMAID = "**Diagram style: Mermaid.** Diagram rules: `references/diagrams-mermaid.md`. Examples: `references/examples-mermaid/`."
+ASCII = "**Diagram style: ASCII.** Diagram rules: `references/diagrams-ascii.md`. Examples: `references/examples/`."
+STYLES = """\
+Diagram style for the mirrors?
+  m) Mermaid (default): your editor draws the diagrams. Costs fewer tokens:
+     nothing is aligned by hand, so there are no realign passes. Needs a
+     Mermaid preview: GitHub, JetBrains and Obsidian have one; VS Code and
+     Cursor need an extension. Terminals and diffs show the raw source.
+  a) ASCII: hand-drawn text diagrams that look the same anywhere (terminal,
+     diff, any preview); tables stay Markdown tables in both styles. Costs
+     more tokens: the subagent counts characters to align every box and
+     arrow, and redoes the lines the checker flags."""
+EXTENSION = """\
+Mermaid: to see the diagrams in the VS Code or Cursor Markdown preview, install
+a Mermaid extension such as "Markdown Preview Mermaid Support"
+(bierner.markdown-mermaid). GitHub, JetBrains and Obsidian render them already.
+Cursor's agent chat draws Mermaid on its own; terminals show the source."""
 MODELS = """\
 Model: the subagent ships with `model: inherit` (it uses the parent's model).
 Set `model:` in .claude/agents/beautyfact.md and .cursor/agents/beautyfact.md
@@ -88,6 +110,29 @@ def ask_auto(args: list[str]) -> bool:
         answer = input("[a/m]: ").strip().lower()
         if answer in ("a", "m"):
             return answer == "a"
+
+
+def ask_mermaid(args: list[str]) -> bool:
+    if "--mermaid" in args or "--ascii" in args:
+        return "--ascii" not in args
+    if not sys.stdin.isatty():
+        return True
+    print()
+    print(STYLES)
+    while True:
+        answer = input("[M/a]: ").strip().lower()
+        if answer in ("", "m", "a"):
+            return answer != "a"
+
+
+def set_style(skill: Path, mermaid: bool) -> None:
+    path = skill / "SKILL.md"
+    text = path.read_text()
+    old, new = (ASCII, MERMAID) if mermaid else (MERMAID, ASCII)
+    if new not in text:
+        if old not in text:
+            sys.exit(f"Diagram style line not found in {path}")
+        path.write_text(text.replace(old, new))
 
 
 def register(settings_path: Path, auto: bool) -> tuple[list[str], list[str]]:
@@ -138,8 +183,10 @@ def main() -> None:
     if not target.is_dir():
         sys.exit(f"Not a directory: {target}")
     auto = ask_auto(args)
+    mermaid = ask_mermaid(args)
     claude = target / ".claude"
     copy_files(target, claude)
+    set_style(claude / "skills" / "beautyfact", mermaid)
     added, removed = register(claude / "settings.json", auto)
     print(f"Installed in {claude}")
     print(f"Subagent: {target / '.cursor' / 'agents' / 'beautyfact.md'}")
@@ -151,8 +198,12 @@ def main() -> None:
         print("constants in .claude/hooks/beautyfact_companion.py")
     else:
         print("Mode: manual. Ask for a mirror with /beautyfact <file> (re-run with --auto to switch)")
+    print("Diagrams: " + ("Mermaid (re-run with --ascii to switch)" if mermaid else "ASCII (re-run with --mermaid to switch)"))
     if ignore_snapshots(target):
         print(f"Added {IGNORE} to {target / '.gitignore'}")
+    if mermaid:
+        print()
+        print(EXTENSION)
     print()
     print(MODELS)
 

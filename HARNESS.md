@@ -34,6 +34,8 @@ Claude Code also reads `CLAUDE.md`. Copilot also reads `.github/copilot-instruct
 
 Before installing, ask the user: automatic (each document to review gets a mirror when it is written) or manual (only when they call the beautyfact skill). For manual, do not register `beautyfact_companion.py`; register the other two hooks either way. With `install.py`, pass `--auto` or `--manual` with the answer.
 
+Then ask the diagram style, Mermaid by default. Tell the user, briefly: Mermaid costs fewer tokens (nothing is aligned by hand, so there are no realign passes) but needs a Mermaid preview: GitHub, JetBrains and Obsidian have one, VS Code and Cursor need an extension such as «Markdown Preview Mermaid Support» (`bierner.markdown-mermaid`), and terminals show the raw source. ASCII looks the same anywhere but costs more tokens. For ASCII, replace the `**Diagram style: Mermaid.**` line of the installed `SKILL.md` with `**Diagram style: ASCII.** Diagram rules: \`references/diagrams-ascii.md\`. Examples: \`references/examples/\`.` With `install.py`, pass `--mermaid` or `--ascii`. For Mermaid, invite the user to install the extension if their editor needs one.
+
 Also copy `hooks/beautyfact_relink.py` beside the hooks. The subagent runs it; it is not registered as a hook. Add `.beautyfact/` to the project's `.gitignore`: the checker keeps a copy of each source there so the next mirror update can shift its links.
 
 ## Model

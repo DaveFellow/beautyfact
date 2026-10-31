@@ -14,12 +14,10 @@ Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
 Four new decisions need your eyes first: who may run command probes (D17), how «**done**» marks and visits work (D12), where the CLI is copied (D20), and the write lock (D14). Also check that every security threat points to a spec scenario.
 
-```text
- D17  probes     ──▶ command probes run only from the extension;
-                     consent lives in VS Code, not in the workspace
- D12  done marks ──▶ «done» marks and visits per unit;
-                     moving forward marks the phase just left as done
- D20  CLI copy   ──▶ CLI copied into .workflow/bin/ so agents can run it
- D14  lock file  ──▶ stops two parallel hook calls from losing an update
- Security        ──▶ every threat maps to a spec scenario
-```
+| Check | What it decides |
+| --- | --- |
+| D17 probes | Command probes run only from the extension; consent lives in VS Code, not in the workspace |
+| D12 done marks | «**done**» marks and visits per unit; moving forward marks the phase just left as done |
+| D20 CLI copy | CLI copied into `.workflow/bin/` so agents can run it |
+| D14 lock file | Stops two parallel hook calls from losing an update |
+| Security | Every threat maps to a spec scenario |

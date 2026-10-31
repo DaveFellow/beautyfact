@@ -6,13 +6,13 @@ Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
 🔗 Source: [design.md L138–L144](design.md#L138)
 
-```text
- Agent sync never runs command probes  ──▶ skipped and named
- Page replace loses scroll position    ──▶ script restores it (D18)
- Stale lock blocks writes              ──▶ expires after 10 s (D14)
- Hook event names differ per harness   ──▶ confirm before the adapter
- Copied CLI goes out of date           ──▶ version file, offer reinstall
-```
+| Risk | Mitigation |
+| --- | --- |
+| Agent sync never runs command probes | Skipped and named |
+| Page replace loses scroll position | Script restores it (D18) |
+| Stale lock blocks writes | Expires after 10 s (D14) |
+| Hook event names differ per harness | Confirm before the adapter |
+| Copied CLI goes out of date | Version file, offer reinstall |
 
 - ⚠️ Command probes never run from an agent's `sync`: they are skipped and named, and «**Workflow: Run sync**» runs them after consent.
 - ⚠️ Hook event names and payload fields differ per harness: confirm them before writing the adapter, as the spec says.

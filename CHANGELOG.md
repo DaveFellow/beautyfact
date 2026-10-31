@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased (`v0.21`)
+
+### Added
+
+- Mermaid diagram style, the new default. Graphs (flows, layers, sequences, lifecycles, pipelines) are Mermaid blocks; columns, rows, bars, and step tables are Markdown tables. Nothing is aligned by hand, so mirrors cost fewer tokens. UI mockups and folder trees stay as text.
+- `install.py` asks the diagram style after the mode (`--mermaid` / `--ascii` up front; without a terminal it stays Mermaid), writes the choice into the installed `SKILL.md`, and points VS Code and Cursor users to a Mermaid preview extension. `HARNESS.md` gives other harnesses the same question.
+- Both styles draw tabular content (goals / non-goals, risk ──▶ mitigation, `▓` counts, step tables, case ──▶ response) as Markdown tables instead of hand-aligned text columns. ASCII diagrams are kept for flows, layers, sequences, trees, and mockups.
+- `references/diagrams-mermaid.md` (rules and a safe syntax subset) and `references/examples-mermaid/` (every pattern redrawn). The ASCII rules moved to `references/diagrams-ascii.md`.
+- The checker lints Mermaid blocks: allowed types, quoted node and edge labels, no `end` node, no `;` in messages, no emojis, balanced subgraphs, at most 25 lines. Width and box checks apply to `text` blocks only. Tables count as a section's diagram and in the row-count check.
+
+
 Changes on branch `v0.2` compared with branch `v0.1` (`b80d758`, 2026-10-27).
 
 `v0.2` is `7c84986` (2026-10-29). Five commits, 12 files, 552 insertions, 96 deletions.

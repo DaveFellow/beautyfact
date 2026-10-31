@@ -12,7 +12,7 @@
 
 Specs are correct and unreadable. This kit fixes the latter.
 
-Every time a document you should review lands (an OpenSpec change, a Spec Kit feature artifact, an acceptance checklist), beautyfact writes a sibling `<name>_beautyfact.md`: same content, zero loss, redrawn with ASCII diagrams and icons so a human skims it in seconds.
+Every time a document you should review lands (an OpenSpec change, a Spec Kit feature artifact, an acceptance checklist), beautyfact writes a sibling `<name>_beautyfact.md`: same content, zero loss, redrawn with diagrams and icons so a human skims it in seconds. Diagrams are Mermaid by default (cheaper, drawn by your editor) or hand-aligned ASCII (readable anywhere).
 
 ```text
  specs/foo.md          ──▶  specs/foo_beautyfact.md
@@ -48,7 +48,7 @@ The same two requirements, before and after. Nothing is added or cut: the relati
 
 ## 3. ⚙️ Install
 
-Two ways in. Both ask you «**automatic**» or «**manual**» first.
+Two ways in. Both ask you «**automatic**» or «**manual**» first, then «**Mermaid**» or «**ASCII**» diagrams.
 
 ```text
                      ┌─ any harness ───────▶ A. give your agent the URL
@@ -57,7 +57,19 @@ Two ways in. Both ask you «**automatic**» or «**manual**» first.
 
  automatic ──▶ each document to review gets its mirror when written
  manual    ──▶ only when you call /beautyfact path/to/file.md
+ mermaid   ──▶ default: fewer tokens, needs a Mermaid preview
+ ascii     ──▶ more tokens, readable in any viewer or terminal
 ```
+
+| | Mermaid (default) | ASCII |
+| --- | --- | --- |
+| Tokens | Fewer: no alignment, no realign passes | More: every box and arrow aligned by hand |
+| GitHub, JetBrains, Obsidian | Rendered | Rendered |
+| VS Code, Cursor preview | Needs an extension, e.g. `bierner.markdown-mermaid` | Rendered |
+| Terminal, `git diff` | Raw Mermaid source | Diagrams as drawn; tables as raw Markdown |
+
+- ⚠️ Mermaid in VS Code or Cursor: install a Mermaid preview extension such as «**Markdown Preview Mermaid Support**». Cursor's agent chat draws Mermaid without it.
+- 📌 Both styles use Markdown tables for anything that is only columns (scope, risks, counts, step tables). UI mockups and folder trees stay as text in both.
 
 ### 🤖 A. Give your agent the URL
 
@@ -69,18 +81,18 @@ and adapt the hooks to my harness.
 ```
 
 - 📌 The agent clones the kit outside your project, follows `HARNESS.md` for your harness's paths, and deletes the clone when done.
-- 📌 On Claude Code or Cursor it runs `install.py` with `--auto` or `--manual`, after asking you which.
+- 📌 On Claude Code or Cursor it runs `install.py` with `--auto` or `--manual` and `--mermaid` or `--ascii`, after asking you which.
 - 📌 It copies `skills/beautyfact/`, `agents/beautyfact.md`, `rules/beautyfact-subagent.mdc`, and `hooks/beautyfact_*.py`, then registers the hooks.
 
 ### 💻 B. Run the script (Claude Code and Cursor)
 
 ```bash
 git clone https://github.com/DaveFellow/beautyfact /tmp/beautyfact
-python3 /tmp/beautyfact/install.py /path/to/your/project  # asks a/m
+python3 /tmp/beautyfact/install.py /path/to/your/project  # asks a/m, then M/a
 ```
 
-- 📌 `--auto` or `--manual` answers the question up front.
-- 📌 Re-run to update or to switch mode: hooks never duplicate, and `settings.json` is backed up first.
+- 📌 `--auto` or `--manual` and `--mermaid` or `--ascii` answer the questions up front. Without a terminal the style stays Mermaid.
+- 📌 Re-run to update or to switch mode or diagram style: hooks never duplicate, and `settings.json` is backed up first.
 - ⚠️ Other harnesses: use option A. The script only knows the Claude Code and Cursor paths.
 
 ## 4. 📁 What goes where

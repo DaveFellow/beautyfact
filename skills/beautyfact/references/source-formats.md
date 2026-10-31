@@ -30,7 +30,7 @@ Project conventions to keep when present (see `.claude/rules/writing.md`):
 
 Layout: `.specify/memory/constitution.md`, and per feature `specs/<NNN-feature>/` with `spec.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, `tasks.md`.
 
-Every Spec Kit artifact gets the same treatment as the examples in `references/examples/`, with no exceptions: a diagram per structured section, a 1–3 line summary before a diagram-only section, nothing omitted (including `[NEEDS CLARIFICATION]` markers and every `FR-` / `SC-` / `T` ID), a `🔗 Source` link per section, and a link beside each story, scenario, requirement, and task title.
+Every Spec Kit artifact gets the same treatment as the examples in the folder the diagram style names, with no exceptions: a diagram per structured section, a 1–3 line summary before a diagram-only section, nothing omitted (including `[NEEDS CLARIFICATION]` markers and every `FR-` / `SC-` / `T` ID), a `🔗 Source` link per section, and a link beside each story, scenario, requirement, and task title.
 
 | Source | Diagrams to use |
 | --- | --- |

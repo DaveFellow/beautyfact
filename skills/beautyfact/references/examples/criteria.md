@@ -8,21 +8,20 @@ Excerpt from a real `_beautyfact` file. Copy the shape, not the content.
 
 Sixteen criteria in four groups (grouping, not in the source): CLI writes, phase moves, panel display, sync and safety.
 
-```text
- CLI writes (grouping)     Add a unit · Reject unknown phase
- Phase moves (grouping)    Advance · Skipped phases done · Backward jump
- Panel display (grouping)  Gate lock · Lock clears · Done unit
- Sync, safety (grouping)   Probe sync · Untrusted workspace
-```
+| Group | Criteria |
+| --- | --- |
+| CLI writes (grouping) | Add a unit · Reject unknown phase |
+| Phase moves (grouping) | Advance · Skipped phases done · Backward jump |
+| Panel display (grouping) | Gate lock · Lock clears · Done unit |
+| Sync, safety (grouping) | Probe sync · Untrusted workspace |
 
 ### 🔄 Phase moves, step by step 🔗 [L63–L67](proposal.md#L63)
 
-```text
-                  Plan   Red    Green  Audit
- 1 start          [>]    [ ]    [ ]    [ ]
- 2 Plan ▶ Green   [x]    [x]    [>]    [ ]    Red skipped: done
- 4 Audit ▶ Green  [x]    [x]    [>]    [ ]    Green visit 2: shows 2
-```
+| Step | Plan | Red | Green | Audit | Note |
+| --- | --- | --- | --- | --- | --- |
+| 1 start | [>] | [ ] | [ ] | [ ] | |
+| 2 Plan ▶ Green | [x] | [x] | [>] | [ ] | Red skipped: done |
+| 4 Audit ▶ Green | [x] | [x] | [>] | [ ] | Green visit 2: shows 2 |
 
 ### 🎯 Criteria 🔗 [L62–L77](proposal.md#L62)
 
